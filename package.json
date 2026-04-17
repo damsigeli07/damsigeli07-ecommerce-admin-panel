@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "check:env": "node scripts/check-env.mjs",
+    "seed:demo": "node scripts/seed-demo.mjs",
     "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
