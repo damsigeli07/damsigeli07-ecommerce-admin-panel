@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
+    "check:env": "node scripts/check-env.mjs",
     "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
