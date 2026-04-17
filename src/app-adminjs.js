@@ -5,8 +5,6 @@ import bodyParser from 'body-parser';
 import AdminJS from 'adminjs';
 import AdminJSExpress from '@adminjs/express';
 import { Database, Resource } from '@adminjs/sequelize';
-import session from 'express-session';
-import cookieParser from 'cookie-parser';
 import path from 'path';
 import adminJsOptions from './config/adminjs.js';
 import authRoutes from './routes/auth.js';
@@ -28,25 +26,6 @@ app.use(cors({
     : ['http://localhost:3000', 'http://localhost:5000'],
   credentials: true
 }));
-
-app.use(cookieParser());
-
-// Session for AdminJS auth
-app.use(session({
-  name: 'eap.sid',
-  secret: process.env.SESSION_SECRET || 'change-me-in-env',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-  },
-}));
-
-// Body parser middleware
-app.use(bodyParser.json({ limit: '10mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
 // Minimal UI pages (assignment "UI")
 app.get('/', (req, res) => {
@@ -121,9 +100,13 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
   },
   null,
   {
-    secret: process.env.SESSION_SECRET || 'change-me-in-env',
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    },
   },
 );
 app.use(adminJsOptions.rootPath, adminRouter);
@@ -136,7 +119,12 @@ app.get('/api', (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
-app.use('/api', authRoutes);
+app.use(
+  '/api',
+  bodyParser.json({ limit: '10mb' }),
+  bodyParser.urlencoded({ extended: true, limit: '10mb' }),
+  authRoutes,
+);
 
 // Global error handler
 app.use((error, req, res, next) => {
