@@ -9,6 +9,7 @@ import {
   Order,
   OrderItem,
   Product,
+  Profile,
   Setting,
   User,
 } from '../models/index.js';
@@ -23,6 +24,10 @@ const Components = {
   Dashboard: componentLoader.add(
     'Dashboard',
     path.join(__dirname, '..', 'admin', 'components', 'Dashboard.jsx'),
+  ),
+  Profile: componentLoader.add(
+    'Profile',
+    path.join(__dirname, '..', 'admin', 'components', 'Profile.jsx'),
   ),
 };
 
@@ -121,6 +126,25 @@ const adminJsOptions = {
         href: ({ h }) => h.dashboardUrl(),
         actions: {
           list: { isAccessible: ({ currentAdmin }) => !!currentAdmin },
+          show: { isAccessible: () => false },
+          edit: { isAccessible: () => false },
+          new: { isAccessible: () => false },
+          delete: { isAccessible: () => false },
+          bulkDelete: { isAccessible: () => false },
+        },
+      },
+    },
+    {
+      resource: Profile,
+      options: {
+        id: 'Profile',
+        navigation: { name: 'Admin', icon: 'User' },
+        component: Components.Profile,
+        actions: {
+          list: { 
+            isAccessible: ({ currentAdmin }) => !!currentAdmin,
+            actionType: 'show'
+          },
           show: { isAccessible: () => false },
           edit: { isAccessible: () => false },
           new: { isAccessible: () => false },

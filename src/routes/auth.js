@@ -1,6 +1,6 @@
 import express from 'express';
 import { Order, User } from '../models/index.js';
-import { comparePassword } from '../utils/passwordUtils.js';
+import { comparePassword, hashPassword } from '../utils/passwordUtils.js';
 import { generateToken } from '../utils/tokenUtils.js';
 import { authenticateToken } from '../middleware/auth.js';
 
@@ -121,6 +121,104 @@ router.get('/me', authenticateToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error'
+    });
+  }
+});
+
+/**
+ * PUT /api/profile
+ * Update user profile (name, email, password)
+ * Body: { name, email, currentPassword?, newPassword? }
+ */
+router.put('/profile', authenticateToken, async (req, res) => {
+  try {
+    const { name, email, currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    // Validate input
+    if (!name || !email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name and email are required'
+      });
+    }
+
+    // Find user
+    const user = await User.findByPk(userId, {
+      attributes: ['id', 'email', 'password', 'name', 'role']
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if email is being changed to one that already exists
+    if (email !== user.email) {
+      const existingUser = await User.findOne({
+        where: { email },
+        attributes: ['id']
+      });
+
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email already exists'
+        });
+      }
+    }
+
+    // Prepare update data
+    const updateData = {
+      name: name.trim(),
+      email: email.trim().toLowerCase()
+    };
+
+    // Handle password change
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({
+          success: false,
+          message: 'Current password is required to change password'
+        });
+      }
+
+      // Verify current password
+      const isCurrentPasswordValid = await comparePassword(currentPassword, user.password);
+      if (!isCurrentPasswordValid) {
+        return res.status(400).json({
+          success: false,
+          message: 'Current password is incorrect'
+        });
+      }
+
+      // Hash new password
+      updateData.password = await hashPassword(newPassword);
+    }
+
+    // Update user
+    await user.update(updateData);
+
+    // Return updated user info (excluding password)
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: {
+        id: user.id,
+        email: updateData.email,
+        name: updateData.name,
+        role: user.role
+      }
+    });
+
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error?.message : undefined
     });
   }
 });
