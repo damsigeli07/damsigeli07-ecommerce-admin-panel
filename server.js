@@ -5,7 +5,7 @@ dotenv.config({ path: path.join(process.cwd(), '.env') });
 
 import app from './src/app-adminjs.js';
 import { initializeDatabase } from './src/config/database.js';
-import { User, Setting } from './src/models/index.js';
+import { User, Setting, Category, Product } from './src/models/index.js';
 import { hashPassword } from './src/utils/passwordUtils.js';
 
 const PORT = process.env.PORT || 5000;
@@ -53,6 +53,59 @@ const startServer = async () => {
 
     for (const setting of defaultSettings) {
       await Setting.findOrCreate({ where: { key: setting.key }, defaults: setting });
+    }
+
+    const demoCategories = [
+      { name: 'Electronics', description: 'Devices, accessories, and gadgets' },
+      { name: 'Apparel', description: 'Clothing and wearable accessories' },
+      { name: 'Home & Kitchen', description: 'Household and kitchen items' },
+    ];
+    for (const c of demoCategories) {
+      await Category.findOrCreate({ where: { name: c.name }, defaults: { description: c.description } });
+    }
+
+    const demoProducts = [
+      {
+        name: 'Wireless Mouse',
+        description: 'Compact wireless mouse with long battery life',
+        price: '24.99',
+        stock: 120,
+        categoryName: 'Electronics',
+      },
+      {
+        name: 'USB-C Hub',
+        description: '7-in-1 USB-C hub with HDMI and card reader',
+        price: '49.50',
+        stock: 45,
+        categoryName: 'Electronics',
+      },
+      {
+        name: 'Cotton T-Shirt',
+        description: 'Unisex crew neck tee',
+        price: '18.00',
+        stock: 200,
+        categoryName: 'Apparel',
+      },
+      {
+        name: 'Ceramic Mug Set',
+        description: 'Set of 4 stackable mugs',
+        price: '32.00',
+        stock: 60,
+        categoryName: 'Home & Kitchen',
+      },
+    ];
+    for (const p of demoProducts) {
+      const category = await Category.findOne({ where: { name: p.categoryName } });
+      if (!category) continue;
+      const { categoryName, ...defaults } = p;
+      await Product.findOrCreate({
+        where: { name: p.name },
+        defaults: {
+          ...defaults,
+          categoryId: category.id,
+          isActive: true,
+        },
+      });
     }
 
     app.listen(PORT, () => {

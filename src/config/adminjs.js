@@ -3,7 +3,15 @@ import { ComponentLoader } from 'adminjs';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
-import { Category, Order, OrderItem, Product, Setting, User } from '../models/index.js';
+import {
+  AdminDashboardNav,
+  Category,
+  Order,
+  OrderItem,
+  Product,
+  Setting,
+  User,
+} from '../models/index.js';
 import { hashPassword } from '../utils/passwordUtils.js';
 
 dotenv.config({ path: path.join(process.cwd(), '.env') });
@@ -15,10 +23,6 @@ const Components = {
   Dashboard: componentLoader.add(
     'Dashboard',
     path.join(__dirname, '..', 'admin', 'components', 'Dashboard.jsx'),
-  ),
-  SettingsPage: componentLoader.add(
-    'SettingsPage',
-    path.join(__dirname, '..', 'admin', 'components', 'Settings.jsx'),
   ),
 };
 
@@ -45,6 +49,20 @@ const adminJsOptions = {
   componentLoader,
   branding: {
     companyName: process.env.SITE_NAME || 'ECommerce Admin',
+  },
+  locale: {
+    language: 'en',
+    translations: {
+      en: {
+        resources: {
+          AdminDashboardNav: {
+            labels: {
+              AdminDashboardNav: 'Admin Dashboard',
+            },
+          },
+        },
+      },
+    },
   },
   dashboard: {
     component: Components.Dashboard,
@@ -94,15 +112,23 @@ const adminJsOptions = {
       };
     },
   },
-  pages: {
-    settings: {
-      label: 'Settings',
-      icon: 'Settings',
-      component: Components.SettingsPage,
-      isAccessible: isAdmin,
-    },
-  },
   resources: [
+    {
+      resource: AdminDashboardNav,
+      options: {
+        id: 'AdminDashboardNav',
+        navigation: { name: 'Admin', icon: 'Home' },
+        href: ({ h }) => h.dashboardUrl(),
+        actions: {
+          list: { isAccessible: ({ currentAdmin }) => !!currentAdmin },
+          show: { isAccessible: () => false },
+          edit: { isAccessible: () => false },
+          new: { isAccessible: () => false },
+          delete: { isAccessible: () => false },
+          bulkDelete: { isAccessible: () => false },
+        },
+      },
+    },
     {
       resource: User,
       options: {

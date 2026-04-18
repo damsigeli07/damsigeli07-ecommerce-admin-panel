@@ -5,6 +5,7 @@ import Product from './Product.js';
 import Order from './Order.js';
 import OrderItem from './OrderItem.js';
 import Setting from './Setting.js';
+import AdminDashboardNav from './AdminDashboardNav.js';
 
 // Define model relationships with proper foreign keys and cascade deletes
 
@@ -59,7 +60,8 @@ export {
   Product,
   Order,
   OrderItem,
-  Setting
+  Setting,
+  AdminDashboardNav,
 };
 
 // Default export with all models
@@ -70,5 +72,6 @@ export default {
   Product,
   Order,
   OrderItem,
-  Setting
+  Setting,
+  AdminDashboardNav,
 };
