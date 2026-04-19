@@ -123,9 +123,11 @@ const adminJsOptions = {
       options: {
         id: 'AdminDashboardNav',
         navigation: { name: 'Admin', icon: 'Home' },
-        href: ({ h }) => h.dashboardUrl(),
         actions: {
-          list: { isAccessible: ({ currentAdmin }) => !!currentAdmin },
+          list: { 
+            isAccessible: ({ currentAdmin }) => !!currentAdmin,
+            actionType: 'show'
+          },
           show: { isAccessible: () => false },
           edit: { isAccessible: () => false },
           new: { isAccessible: () => false },
