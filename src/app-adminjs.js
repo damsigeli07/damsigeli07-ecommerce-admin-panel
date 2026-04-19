@@ -21,9 +21,9 @@ app.set('trust proxy', 1);
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['your-production-domain.com'] 
-    : ['http://localhost:3000', 'http://localhost:5000'],
+  origin: process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',')
+    : true,
   credentials: true
 }));
 
